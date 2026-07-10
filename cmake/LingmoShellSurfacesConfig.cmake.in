@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+set_and_check(LINGMOSHELLSURFACES_INCLUDEDIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set_and_check(LINGMOSHELLSURFACES_LIBDIR "@PACKAGE_CMAKE_INSTALL_LIBDIR@")
+
+include("${CMAKE_CURRENT_LIST_DIR}/LingmoShellSurfacesTargets.cmake")
+
+check_required_components(LingmoShellSurfaces)

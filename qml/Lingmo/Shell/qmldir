@@ -1,0 +1,6 @@
+module Lingmo.Shell
+plugin LingmoShellSurfacesPlugin
+classname LingmoShellPlugin
+PanelSurface   1.0 PanelSurface.qml
+DesktopSurface 1.0 DesktopSurface.qml
+OverviewSurface 1.0 OverviewSurface.qml

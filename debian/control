@@ -1,0 +1,66 @@
+Source: lingmo-shell-surfaces
+Section: libs
+Priority: optional
+Maintainer: Matrinsoft <support@matrinsoft.cn>
+Build-Depends:
+ debhelper-compat (= 13),
+ cmake (>= 3.21),
+ ninja-build,
+ qt6-base-dev,
+ qt6-declarative-dev,
+ qt6-wayland-dev,
+ libwayland-dev,
+ libxcb1-dev,
+ libx11-dev,
+ liblingmoutils-dev,
+ liblingmoconfig-dev,
+ liblingmoipc-dev,
+ liblingmoplugin-dev,
+ liblingmotheme-dev,
+ liblingmowindow-dev,
+ liblingmoshellcore-dev,
+ liblingmoicon-dev,
+Standards-Version: 4.6.2
+Homepage: https://github.com/Matrinsoft/lingmo-shell-surfaces
+
+Package: liblingmoshellsurfaces1
+Architecture: any
+Multi-Arch: same
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: Lingmo Desktop shell surfaces library (runtime)
+ LingmoShellSurfaces provides the visual shell layer for Lingmo Desktop,
+ including Panel (top/bottom taskbar), Desktop (wallpaper/background), and
+ Overview (window switcher/task view) surfaces built on wlr-layer-shell
+ (Wayland) and EWMH (X11).
+ .
+ This package contains the shared library.
+
+Package: liblingmoshellsurfaces-dev
+Architecture: any
+Multi-Arch: same
+Section: libdevel
+Depends:
+ liblingmoshellsurfaces1 (= ${binary:Version}),
+ qt6-base-dev,
+ ${misc:Depends},
+Description: Lingmo Desktop shell surfaces library (development)
+ LingmoShellSurfaces provides the visual shell layer for Lingmo Desktop,
+ including Panel (top/bottom taskbar), Desktop (wallpaper/background), and
+ Overview (window switcher/task view) surfaces.
+ .
+ This package contains development headers and CMake modules.
+
+Package: qml-module-lingmo-shell
+Architecture: any
+Multi-Arch: same
+Section: libs
+Depends:
+ liblingmoshellsurfaces1 (= ${binary:Version}),
+ qml6-module-qtquick,
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: Lingmo Desktop shell surfaces QML plugin
+ QML bindings for LingmoShellSurfaces, providing PanelSurfaceItem,
+ DesktopSurfaceItem, and OverviewSurfaceItem types under Lingmo.Shell 1.0.

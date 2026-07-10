@@ -1,0 +1,196 @@
+name: Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-gcc:
+    runs-on: ubuntu-24.04
+    container: debian:trixie
+    steps:
+      - name: Install git
+        run: apt-get update -qq && apt-get install -y -qq git
+
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq cmake ninja-build g++ lcov \
+            qt6-base-dev qt6-declarative-dev qt6-wayland-dev \
+            libwayland-dev libxcb1-dev libx11-dev \
+            curl jq
+
+      - name: Download lingmo-utils
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-utils/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoutils1") or startswith("liblingmoutils-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoutils*.deb || apt-get install -y -f
+
+      - name: Download lingmo-config
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-config/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoconfig1") or startswith("liblingmoconfig-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoconfig*.deb || apt-get install -y -f
+
+      - name: Download lingmo-ipc
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-ipc/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoipc1") or startswith("liblingmoipc-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoipc*.deb || apt-get install -y -f
+
+      - name: Download lingmo-plugin
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-plugin/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoplugin1") or startswith("liblingmoplugin-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoplugin*.deb || apt-get install -y -f
+
+      - name: Download lingmo-theme
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-theme/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmotheme1") or startswith("liblingmotheme-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmotheme*.deb || apt-get install -y -f
+
+      - name: Download lingmo-window
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-window/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmowindow1") or startswith("liblingmowindow-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmowindow*.deb || apt-get install -y -f
+
+      - name: Download lingmo-shell-core
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-shell-core/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoshellcore1") or startswith("liblingmoshellcore-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoshellcore*.deb || apt-get install -y -f
+
+      - name: Download lingmo-icon
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-icon/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoicon1") or startswith("liblingmoicon-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoicon*.deb || apt-get install -y -f
+
+      - name: Configure (GCC + coverage)
+        run: >
+          cmake -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DBUILD_TESTING=ON
+          -DCMAKE_CXX_FLAGS="--coverage"
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure --timeout 60
+
+  test-clang:
+    runs-on: ubuntu-24.04
+    container: debian:trixie
+    steps:
+      - name: Install git
+        run: apt-get update -qq && apt-get install -y -qq git
+
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq cmake ninja-build clang++ \
+            qt6-base-dev qt6-declarative-dev qt6-wayland-dev \
+            libwayland-dev libxcb1-dev libx11-dev \
+            curl jq
+
+      - name: Download lingmo-utils
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-utils/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoutils1") or startswith("liblingmoutils-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoutils*.deb || apt-get install -y -f
+
+      - name: Download lingmo-config
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-config/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoconfig1") or startswith("liblingmoconfig-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoconfig*.deb || apt-get install -y -f
+
+      - name: Download lingmo-ipc
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-ipc/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoipc1") or startswith("liblingmoipc-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoipc*.deb || apt-get install -y -f
+
+      - name: Download lingmo-plugin
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-plugin/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoplugin1") or startswith("liblingmoplugin-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoplugin*.deb || apt-get install -y -f
+
+      - name: Download lingmo-theme
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-theme/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmotheme1") or startswith("liblingmotheme-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmotheme*.deb || apt-get install -y -f
+
+      - name: Download lingmo-window
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-window/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmowindow1") or startswith("liblingmowindow-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmowindow*.deb || apt-get install -y -f
+
+      - name: Download lingmo-shell-core
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-shell-core/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoshellcore1") or startswith("liblingmoshellcore-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoshellcore*.deb || apt-get install -y -f
+
+      - name: Download lingmo-icon
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-icon/releases/latest \
+            | jq -r '.assets[] | select(.name | (startswith("liblingmoicon1") or startswith("liblingmoicon-dev")) and endswith(".deb")) | .browser_download_url')
+          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+          dpkg -i /tmp/liblingmoicon*.deb || apt-get install -y -f
+
+      - name: Configure (Clang)
+        run: >
+          cmake -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DBUILD_TESTING=ON
+          -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure --timeout 60
