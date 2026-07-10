@@ -71,13 +71,14 @@ jobs:
           for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
           dpkg -i /tmp/liblingmowindow*.deb || apt-get install -y -f
 
-      - name: Download lingmo-shell-core
+      - name: Build lingmo-shell-core from source
         run: |
-          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/Matrinsoft/lingmo-shell-core/releases/latest \
-            | jq -r '.assets[] | select(.name | (startswith("liblingmoshellcore1") or startswith("liblingmoshellcore-dev")) and endswith(".deb")) | .browser_download_url')
-          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
-          dpkg -i /tmp/liblingmoshellcore*.deb || apt-get install -y -f
+          git clone --depth 1 https://github.com/Matrinsoft/lingmo-shell-core.git /tmp/lingmo-shell-core
+          cmake -S /tmp/lingmo-shell-core -B /tmp/lingmo-shell-core/build -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DBUILD_TESTING=OFF
+          cmake --build /tmp/lingmo-shell-core/build --parallel
+          cmake --install /tmp/lingmo-shell-core/build
 
       - name: Download lingmo-icon
         run: |
@@ -163,13 +164,14 @@ jobs:
           for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
           dnf install -y /tmp/lingmo-window-*.rpm
 
-      - name: Download lingmo-shell-core
+      - name: Build lingmo-shell-core from source
         run: |
-          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/Matrinsoft/lingmo-shell-core/releases/latest \
-            | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("devel") or contains("libs"))) | .browser_download_url')
-          for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
-          dnf install -y /tmp/lingmo-shell-core-*.rpm
+          git clone --depth 1 https://github.com/Matrinsoft/lingmo-shell-core.git /tmp/lingmo-shell-core
+          cmake -S /tmp/lingmo-shell-core -B /tmp/lingmo-shell-core/build -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DBUILD_TESTING=OFF
+          cmake --build /tmp/lingmo-shell-core/build --parallel
+          cmake --install /tmp/lingmo-shell-core/build
 
       - name: Download lingmo-icon
         run: |
