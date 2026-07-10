@@ -107,9 +107,9 @@ install(TARGETS LingmoShellSurfaces
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/LingmoShellSurfaces/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LingmoShellSurfaces
+    COMPONENT devel
     FILES_MATCHING PATTERN "*.h"
     PATTERN "*.h.in" EXCLUDE
-    COMPONENT devel
 )
 
 install(FILES
