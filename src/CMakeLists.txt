@@ -57,7 +57,7 @@ target_include_directories(LingmoShellSurfaces
 target_link_libraries(LingmoShellSurfaces
     PUBLIC
         ${LINGMO_THEME_TARGET}
-        Lingmo::ShellCore
+        ${LINGMO_SHELLCORE_TARGET}
         Qt6::Core
         Qt6::Gui
         Qt6::Quick
