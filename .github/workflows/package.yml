@@ -75,10 +75,11 @@ jobs:
         run: |
           ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/Matrinsoft/lingmo-shell-core/releases/latest \
-            | jq -r '.assets[] | select(.name | (startswith("liblingmoshellcore1") or startswith("liblingmoshellcore-dev")) and endswith(".deb")) | .browser_download_url')
+            | jq -r '.assets[] | select(.name | endswith(".deb") and (contains("dbgsym") | not) and (contains("buildinfo") | not) and (contains(".changes") | not)) | .browser_download_url')
           if [ -n "$ASSETS" ]; then
-            for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
-            dpkg -i /tmp/liblingmoshellcore*.deb || apt-get install -y -f
+            mkdir -p /tmp/shell-core-debs
+            for url in $ASSETS; do curl -sL "$url" -o "/tmp/shell-core-debs/$(basename $url)"; done
+            dpkg -i /tmp/shell-core-debs/*.deb || apt-get install -y -f
           else
             echo "No release found, building lingmo-shell-core from source"
             git clone --depth 1 https://github.com/Matrinsoft/lingmo-shell-core.git /tmp/lingmo-shell-core
@@ -186,68 +187,4 @@ jobs:
             https://api.github.com/repos/Matrinsoft/lingmo-theme/releases/latest \
             | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("devel") or contains("libs"))) | .browser_download_url')
           if [ -n "$ASSETS" ]; then
-            for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
-            dnf install -y /tmp/lingmo-theme-*.rpm
-          else
-            git clone --depth 1 https://github.com/Matrinsoft/lingmo-theme.git /tmp/lingmo-theme
-            cmake -S /tmp/lingmo-theme -B /tmp/lingmo-theme/build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
-            cmake --build /tmp/lingmo-theme/build --parallel && cmake --install /tmp/lingmo-theme/build
-          fi
-
-      - name: Download lingmo-window
-        run: |
-          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/Matrinsoft/lingmo-window/releases/latest \
-            | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("devel") or contains("libs"))) | .browser_download_url')
-          if [ -n "$ASSETS" ]; then
-            for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
-            dnf install -y /tmp/lingmo-window-*.rpm
-          else
-            git clone --depth 1 https://github.com/Matrinsoft/lingmo-window.git /tmp/lingmo-window
-            cmake -S /tmp/lingmo-window -B /tmp/lingmo-window/build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
-            cmake --build /tmp/lingmo-window/build --parallel && cmake --install /tmp/lingmo-window/build
-          fi
-
-      - name: Download lingmo-shell-core
-        run: |
-          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/Matrinsoft/lingmo-shell-core/releases/latest \
-            | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("devel") or contains("libs"))) | .browser_download_url')
-          if [ -n "$ASSETS" ]; then
-            for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
-            dnf install -y /tmp/lingmo-shell-core-*.rpm
-          else
-            git clone --depth 1 https://github.com/Matrinsoft/lingmo-shell-core.git /tmp/lingmo-shell-core
-            cmake -S /tmp/lingmo-shell-core -B /tmp/lingmo-shell-core/build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
-            cmake --build /tmp/lingmo-shell-core/build --parallel && cmake --install /tmp/lingmo-shell-core/build
-          fi
-
-      - name: Download lingmo-icon
-        run: |
-          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/Matrinsoft/lingmo-icon/releases/latest \
-            | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("devel") or contains("libs"))) | .browser_download_url')
-          if [ -n "$ASSETS" ]; then
-            for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
-            dnf install -y /tmp/lingmo-icon-*.rpm
-          else
-            git clone --depth 1 https://github.com/Matrinsoft/lingmo-icon.git /tmp/lingmo-icon
-            cmake -S /tmp/lingmo-icon -B /tmp/lingmo-icon/build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
-            cmake --build /tmp/lingmo-icon/build --parallel && cmake --install /tmp/lingmo-icon/build
-          fi
-
-      - name: Build RPM
-        run: |
-          mkdir -p /tmp/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-          cd .. && tar czf /tmp/rpmbuild/SOURCES/lingmo-shell-surfaces-1.0.0.tar.gz \
-            --transform='s,^lingmo-shell-surfaces,lingmo-shell-surfaces-1.0.0,' \
-            lingmo-shell-surfaces
-          cd lingmo-shell-surfaces && cp rpm/lingmo-shell-surfaces.spec /tmp/rpmbuild/SPECS/
-          rpmbuild -ba /tmp/rpmbuild/SPECS/lingmo-shell-surfaces.spec \
-            --define "_topdir /tmp/rpmbuild"
-
-      - name: Upload .rpm
-        uses: actions/upload-artifact@v4
-        with:
-          name: lingmo-shell-surfaces-rpm
-          path: /tmp/rpmbuild/RPMS/**/*.rpm
+            for url in $ASSET

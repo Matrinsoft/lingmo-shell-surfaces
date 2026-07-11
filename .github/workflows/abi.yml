@@ -78,10 +78,11 @@ jobs:
         run: |
           ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/Matrinsoft/lingmo-shell-core/releases/latest \
-            | jq -r '.assets[] | select(.name | (startswith("liblingmoshellcore1") or startswith("liblingmoshellcore-dev")) and endswith(".deb")) | .browser_download_url')
+            | jq -r '.assets[] | select(.name | endswith(".deb") and (contains("dbgsym") | not) and (contains("buildinfo") | not) and (contains(".changes") | not)) | .browser_download_url')
           if [ -n "$ASSETS" ]; then
-            for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
-            dpkg -i /tmp/liblingmoshellcore*.deb || apt-get install -y -f
+            mkdir -p /tmp/shell-core-debs
+            for url in $ASSETS; do curl -sL "$url" -o "/tmp/shell-core-debs/$(basename $url)"; done
+            dpkg -i /tmp/shell-core-debs/*.deb || apt-get install -y -f
           else
             echo "No release found, building lingmo-shell-core from source"
             git clone --depth 1 https://github.com/Matrinsoft/lingmo-shell-core.git /tmp/lingmo-shell-core
@@ -114,21 +115,4 @@ jobs:
           cd /tmp/base-branch
           cmake -B build-old -G Ninja \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DCMAKE_CXX_FLAGS="-Og -g"
-          cmake --build build-old --parallel
-
-      - name: Run ABI compliance check
-        if: github.event_name == 'pull_request'
-        run: |
-          abi-compliance-checker \
-            -lib LingmoShellSurfaces \
-            -old /tmp/base-branch/build-old/src/libLingmoShellSurfaces.so \
-            -new build-new/src/libLingmoShellSurfaces.so \
-            -report-path abi-report.html || true
-
-      - name: Upload ABI report
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
-        with:
-          name: abi-report
-          path: abi-report.html
+            -D
