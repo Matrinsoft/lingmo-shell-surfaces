@@ -63,10 +63,10 @@ target_link_libraries(LingmoShellSurfaces
         Qt6::Quick
         Qt6::DBus
     PRIVATE
-        Lingmo::Utils
-        Lingmo::Config
-        Lingmo::IPC
-        Lingmo::Plugin
+        ${LINGMO_UTILS_TARGET}
+        ${LINGMO_CONFIG_TARGET}
+        ${LINGMO_IPC_TARGET}
+        ${LINGMO_PLUGIN_TARGET}
         Qt6::Qml
 )
 
