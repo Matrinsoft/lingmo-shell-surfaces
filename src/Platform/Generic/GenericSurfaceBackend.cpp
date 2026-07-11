@@ -1,4 +1,4 @@
-#include "Generic/GenericSurfaceBackend.h"
+#include "GenericSurfaceBackend.h"
 
 #include <LingmoShellSurfaces/ShellSurface.h>
 #include <LingmoShellSurfaces/Types.h>
