@@ -8,13 +8,6 @@
 #include <QScreen>
 #include <QWindow>
 
-// Qt Wayland client integration headers.
-// These are available when Qt6::WaylandClient is present.
-#if defined(QT_WAYLANDCLIENT_LIB)
-#include <QtWaylandClient/private/qwaylandwindow_p.h>
-#include <QtWaylandClient/private/qwaylanddisplay_p.h>
-#endif
-
 Q_LOGGING_CATEGORY(lcWayland, "lingmo.shell.surfaces.wayland")
 
 namespace Lingmo {
