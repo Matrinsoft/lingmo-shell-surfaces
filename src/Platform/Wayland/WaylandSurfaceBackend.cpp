@@ -10,6 +10,7 @@
 #include <QPointer>
 #include <QScreen>
 #include <QWindow>
+#include <QtGui/qpa/qplatformnativeinterface.h>
 #include <wayland-client-protocol.h>
 
 Q_LOGGING_CATEGORY(lcWayland, "lingmo.shell.surfaces.wayland")
