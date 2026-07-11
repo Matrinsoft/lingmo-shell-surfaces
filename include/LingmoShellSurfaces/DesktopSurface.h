@@ -5,6 +5,7 @@
 #include <LingmoShellSurfaces/Types.h>
 
 #include <QColor>
+#include <QPoint>
 #include <QObject>
 #include <QString>
 

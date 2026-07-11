@@ -4,11 +4,11 @@
 #include <LingmoShellSurfaces/Types.h>
 
 #include <QObject>
+#include <QScreen>
 #include <QString>
 
 #include <memory>
 
-class QScreen;
 class QWindow;
 
 namespace Lingmo {

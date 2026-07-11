@@ -55,11 +55,11 @@ ShellSurface::ShellSurface(ShellSurfacePrivate *d, QObject *parent)
         d->backend = d->createBackend();
 
     // Track screen added/removed so we can move the surface if needed.
-    connect(QGuiApplication::instance(), &QGuiApplication::screenRemoved,
+    connect(qobject_cast<QGuiApplication *>(QGuiApplication::instance()),
+            &QGuiApplication::screenRemoved,
             this, [this](QScreen *removed) {
-                if (d->screen == removed) {
+                if (this->d->screen == removed)
                     setScreen(QGuiApplication::primaryScreen());
-                }
             });
 }
 
