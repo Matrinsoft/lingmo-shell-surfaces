@@ -71,23 +71,13 @@ jobs:
           for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
           dpkg -i /tmp/liblingmowindow*.deb || apt-get install -y -f
 
-      - name: Download lingmo-shell-core
+      - name: Build lingmo-shell-core from source
         run: |
-          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/Matrinsoft/lingmo-shell-core/releases/latest \
-            | jq -r '.assets[] | select(.name | endswith(".deb") and (contains("dbgsym") | not) and (contains("buildinfo") | not) and (contains(".changes") | not)) | .browser_download_url')
-          if [ -n "$ASSETS" ]; then
-            mkdir -p /tmp/shell-core-debs
-            for url in $ASSETS; do curl -sL "$url" -o "/tmp/shell-core-debs/$(basename $url)"; done
-            dpkg -i /tmp/shell-core-debs/*.deb || apt-get install -y -f
-          else
-            echo "No release found, building lingmo-shell-core from source"
-            git clone --depth 1 https://github.com/Matrinsoft/lingmo-shell-core.git /tmp/lingmo-shell-core
-            cmake -S /tmp/lingmo-shell-core -B /tmp/lingmo-shell-core/build -G Ninja \
-              -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
-            cmake --build /tmp/lingmo-shell-core/build --parallel
-            cmake --install /tmp/lingmo-shell-core/build
-          fi
+          git clone --depth 1 https://github.com/Matrinsoft/lingmo-shell-core.git /tmp/lingmo-shell-core
+          cmake -S /tmp/lingmo-shell-core -B /tmp/lingmo-shell-core/build -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
+          cmake --build /tmp/lingmo-shell-core/build --parallel
+          cmake --install /tmp/lingmo-shell-core/build
 
       - name: Download lingmo-icon
         run: |
@@ -188,6 +178,4 @@ jobs:
         run: |
           ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/Matrinsoft/lingmo-theme/releases/latest \
-            | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("devel") or contains("libs"))) | .browser_download_url')
-          if [ -n "$ASSETS" ]; then
-            for url in $ASSET
+            | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("devel") or contains("libs"))) | .browser_
