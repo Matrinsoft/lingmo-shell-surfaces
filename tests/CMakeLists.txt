@@ -46,3 +46,15 @@ target_include_directories(tst_MockBackend PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/tests
 )
+
+# X11 window backend test — compiled unconditionally, uses MockXcbInterface
+# (no real X11 display needed). The xcb headers must be present even on
+# Wayland-only CI because xcb-dev is a common package.
+if(LINGMO_HAVE_X11)
+    lingmo_add_test(tst_X11WindowBackend)
+    target_include_directories(tst_X11WindowBackend PRIVATE
+        ${CMAKE_SOURCE_DIR}/src
+        ${CMAKE_SOURCE_DIR}/tests
+    )
+    target_link_libraries(tst_X11WindowBackend PRIVATE xcb)
+endif()

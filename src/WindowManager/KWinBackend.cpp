@@ -215,6 +215,39 @@ void KWinBackend::closeWindow(const QString &windowId)
         kwinInterface->call(QStringLiteral("closeWindow"), windowId);
 }
 
+void KWinBackend::minimizeWindow(const QString &windowId)
+{
+#ifdef LINGMO_HAVE_WAYLAND
+    if (toplevelManager) {
+        const auto handles = toplevelManager->handles();
+        for (ForeignToplevelHandle *h : handles) {
+            if (h->handleId() == windowId) {
+                h->requestMinimize();
+                return;
+            }
+        }
+    }
+#endif
+    // No standard KWin D-Bus minimize call — ignore gracefully.
+    Q_UNUSED(windowId)
+}
+
+void KWinBackend::maximizeWindow(const QString &windowId)
+{
+#ifdef LINGMO_HAVE_WAYLAND
+    if (toplevelManager) {
+        const auto handles = toplevelManager->handles();
+        for (ForeignToplevelHandle *h : handles) {
+            if (h->handleId() == windowId) {
+                h->requestMaximize();
+                return;
+            }
+        }
+    }
+#endif
+    Q_UNUSED(windowId)
+}
+
 void KWinBackend::switchToWorkspace(int workspaceIndex)
 {
     if (!vdIntegration || !vdIntegration->isValid()) {

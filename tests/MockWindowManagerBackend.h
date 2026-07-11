@@ -37,6 +37,8 @@ public:
     // ── Recorded calls ────────────────────────────────────────────────────
     QStringList activatedWindows;
     QStringList closedWindows;
+    QStringList minimizedWindows;
+    QStringList maximizedWindows;
     QList<int>  switchedWorkspaces;
 
     // ── WindowManagerBackend interface ────────────────────────────────────
@@ -53,6 +55,16 @@ public:
     void closeWindow(const QString &id) override
     {
         closedWindows.append(id);
+    }
+
+    void minimizeWindow(const QString &id) override
+    {
+        minimizedWindows.append(id);
+    }
+
+    void maximizeWindow(const QString &id) override
+    {
+        maximizedWindows.append(id);
     }
 
     void switchToWorkspace(int idx) override

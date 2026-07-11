@@ -46,6 +46,8 @@ public:
 
     virtual void activateWindow(const QString &windowId)                   = 0;
     virtual void closeWindow(const QString &windowId)                      = 0;
+    virtual void minimizeWindow(const QString &windowId)                   = 0;
+    virtual void maximizeWindow(const QString &windowId)                   = 0;
     virtual void switchToWorkspace(int workspaceIndex)                     = 0;
     virtual void initialize()                                              = 0;
 

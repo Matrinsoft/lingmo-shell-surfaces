@@ -32,6 +32,8 @@ public:
 
     void activateWindow(const QString &windowId)   override;
     void closeWindow(const QString &windowId)      override;
+    void minimizeWindow(const QString &windowId)   override;
+    void maximizeWindow(const QString &windowId)   override;
     void switchToWorkspace(int workspaceIndex)     override;
     void initialize()                              override;
 

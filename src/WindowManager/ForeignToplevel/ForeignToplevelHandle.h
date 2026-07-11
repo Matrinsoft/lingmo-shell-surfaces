@@ -36,6 +36,12 @@ public:
     // Asks the compositor to close this toplevel.
     void requestClose();
 
+    // Asks the compositor to minimize this toplevel.
+    void requestMinimize();
+
+    // Asks the compositor to maximize this toplevel.
+    void requestMaximize();
+
 Q_SIGNALS:
     void ready();    // first done — handle is fully initialised
     void changed();  // subsequent done — some property updated

@@ -34,6 +34,16 @@ void ForeignToplevelHandle::requestClose()
     close();
 }
 
+void ForeignToplevelHandle::requestMinimize()
+{
+    set_minimized();
+}
+
+void ForeignToplevelHandle::requestMaximize()
+{
+    set_maximized();
+}
+
 // ── Protocol event handlers ───────────────────────────────────────────────────
 
 void ForeignToplevelHandle::zwlr_foreign_toplevel_handle_v1_title(const QString &title)
