@@ -194,20 +194,13 @@ jobs:
             cmake --build /tmp/lingmo-theme/build --parallel && cmake --install /tmp/lingmo-theme/build
           fi
 
-      - name: Download lingmo-window
+      - name: Build lingmo-window from source
         run: |
-          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/Matrinsoft/lingmo-window/releases/latest \
-            | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("debugsource") | not)) | .browser_download_url')
-          if [ -n "$ASSETS" ]; then
-            mkdir -p /tmp/rpms-lingmo-window
-            for url in $ASSETS; do curl -sL "$url" -o "/tmp/rpms-lingmo-window/$(basename $url)"; done
-            dnf install -y /tmp/rpms-lingmo-window/*.rpm
-          else
-            git clone --depth 1 https://github.com/Matrinsoft/lingmo-window.git /tmp/lingmo-window
-            cmake -S /tmp/lingmo-window -B /tmp/lingmo-window/build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
-            cmake --build /tmp/lingmo-window/build --parallel && cmake --install /tmp/lingmo-window/build
-          fi
+          git clone --depth 1 https://github.com/Matrinsoft/lingmo-window.git /tmp/lingmo-window
+          cmake -S /tmp/lingmo-window -B /tmp/lingmo-window/build -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
+          cmake --build /tmp/lingmo-window/build --parallel
+          cmake --install /tmp/lingmo-window/build
 
       - name: Build lingmo-shell-core from source
         run: |
