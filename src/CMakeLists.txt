@@ -45,6 +45,10 @@ endif()
 
 if(LINGMO_HAVE_X11)
     list(APPEND SOURCES Platform/X11/X11SurfaceBackend.cpp)
+    list(APPEND SOURCES
+        WindowManager/X11/RealXcbInterface.cpp
+        WindowManager/X11/X11WindowBackend.cpp
+    )
 endif()
 
 set(CMAKE_AUTOMOC ON)
@@ -95,8 +99,10 @@ if(LINGMO_HAVE_WAYLAND)
 endif()
 
 if(LINGMO_HAVE_X11)
-    target_link_libraries(LingmoShellSurfaces PRIVATE ${X11_LIBRARIES})
+    target_link_libraries(LingmoShellSurfaces PRIVATE ${X11_LIBRARIES} xcb)
     target_compile_definitions(LingmoShellSurfaces PRIVATE LINGMO_HAVE_X11=1)
+    target_include_directories(LingmoShellSurfaces PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/WindowManager/X11)
 endif()
 
 target_compile_definitions(LingmoShellSurfaces PRIVATE LINGMOSHELLSURFACES_LIBRARY)
