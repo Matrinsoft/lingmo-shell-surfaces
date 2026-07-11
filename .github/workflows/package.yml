@@ -174,8 +174,71 @@ jobs:
             cmake --build /tmp/lingmo-plugin/build --parallel && cmake --install /tmp/lingmo-plugin/build
           fi
 
+
       - name: Download lingmo-theme
         run: |
           ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/Matrinsoft/lingmo-theme/releases/latest \
-            | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("devel") or contains("libs"))) | .browser_
+            | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("devel") or contains("libs"))) | .browser_download_url')
+          if [ -n "$ASSETS" ]; then
+            for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+            dnf install -y /tmp/lingmo-theme-*.rpm
+          else
+            git clone --depth 1 https://github.com/Matrinsoft/lingmo-theme.git /tmp/lingmo-theme
+            cmake -S /tmp/lingmo-theme -B /tmp/lingmo-theme/build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
+            cmake --build /tmp/lingmo-theme/build --parallel && cmake --install /tmp/lingmo-theme/build
+          fi
+
+      - name: Download lingmo-window
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-window/releases/latest \
+            | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("devel") or contains("libs"))) | .browser_download_url')
+          if [ -n "$ASSETS" ]; then
+            for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+            dnf install -y /tmp/lingmo-window-*.rpm
+          else
+            git clone --depth 1 https://github.com/Matrinsoft/lingmo-window.git /tmp/lingmo-window
+            cmake -S /tmp/lingmo-window -B /tmp/lingmo-window/build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
+            cmake --build /tmp/lingmo-window/build --parallel && cmake --install /tmp/lingmo-window/build
+          fi
+
+      - name: Build lingmo-shell-core from source
+        run: |
+          git clone --depth 1 https://github.com/Matrinsoft/lingmo-shell-core.git /tmp/lingmo-shell-core
+          cmake -S /tmp/lingmo-shell-core -B /tmp/lingmo-shell-core/build -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
+          cmake --build /tmp/lingmo-shell-core/build --parallel
+          cmake --install /tmp/lingmo-shell-core/build
+
+      - name: Download lingmo-icon
+        run: |
+          ASSETS=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Matrinsoft/lingmo-icon/releases/latest \
+            | jq -r '.assets[] | select(.name | endswith(".rpm") and (contains("debug") | not) and (contains("devel") or contains("libs"))) | .browser_download_url')
+          if [ -n "$ASSETS" ]; then
+            for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
+            dnf install -y /tmp/lingmo-icon-*.rpm
+          else
+            git clone --depth 1 https://github.com/Matrinsoft/lingmo-icon.git /tmp/lingmo-icon
+            cmake -S /tmp/lingmo-icon -B /tmp/lingmo-icon/build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=OFF
+            cmake --build /tmp/lingmo-icon/build --parallel && cmake --install /tmp/lingmo-icon/build
+          fi
+
+      - name: Build RPM package
+        run: |
+          VERSION=$(grep "^Version:" rpm/lingmo-shell-surfaces.spec | awk '{print $2}')
+          git archive --format=tar.gz --prefix=lingmo-shell-surfaces-${VERSION}/ HEAD \
+            > /tmp/lingmo-shell-surfaces-${VERSION}.tar.gz
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          cp /tmp/lingmo-shell-surfaces-${VERSION}.tar.gz ~/rpmbuild/SOURCES/
+          cp rpm/lingmo-shell-surfaces.spec ~/rpmbuild/SPECS/
+          rpmbuild -bb ~/rpmbuild/SPECS/lingmo-shell-surfaces.spec
+          mkdir -p artifacts
+          find ~/rpmbuild/RPMS -name "*.rpm" ! -name "*debug*" -exec cp {} artifacts/ \;
+
+      - name: Upload .rpm
+        uses: actions/upload-artifact@v4
+        with:
+          name: lingmo-shell-surfaces-rpm
+          path: artifacts/

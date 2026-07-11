@@ -1,0 +1,3 @@
+usr/include/LingmoShellSurfaces/
+usr/lib/*/libLingmoShellSurfaces.so
+usr/lib/*/cmake/LingmoShellSurfaces/
