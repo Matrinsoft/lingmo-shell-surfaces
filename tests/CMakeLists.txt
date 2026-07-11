@@ -34,3 +34,15 @@ target_compile_definitions(tst_QmlImport PRIVATE
 )
 add_test(NAME tst_QmlImport COMMAND tst_QmlImport)
 set_tests_properties(tst_QmlImport PROPERTIES TIMEOUT 60)
+
+lingmo_add_test(tst_LayerShell)
+lingmo_add_test(tst_WindowManagerBackend)
+target_include_directories(tst_WindowManagerBackend PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+lingmo_add_test(tst_MockBackend)
+target_include_directories(tst_MockBackend PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/tests
+)

@@ -4,23 +4,26 @@
 #include "ShellSurface_p.h"
 
 #include <QAbstractListModel>
-#include <QDBusInterface>
 #include <QList>
 #include <QVariantMap>
 
 namespace Lingmo {
 
-// ── Window model ────────────────────────────────────────────
+class WindowManagerBackend;
+
+// ── Window model ─────────────────────────────────────────────────────────────
 class WindowListModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
     enum Roles {
-        WindowIdRole = Qt::UserRole + 1,
+        WindowIdRole     = Qt::UserRole + 1,
         TitleRole,
+        AppIdRole,
         ThumbnailUrlRole,
         WorkspaceIndexRole,
         IsMinimizedRole,
+        IsActiveRole,
     };
 
     explicit WindowListModel(QObject *parent = nullptr);
@@ -35,7 +38,7 @@ private:
     QList<QVariantMap> m_windows;
 };
 
-// ── Workspace model ─────────────────────────────────────────
+// ── Workspace model ───────────────────────────────────────────────────────────
 class WorkspaceListModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -44,6 +47,7 @@ public:
         WorkspaceIndexRole = Qt::UserRole + 1,
         NameRole,
         WindowCountRole,
+        ActiveRole,         // bool — true when this is the current workspace
     };
 
     explicit WorkspaceListModel(QObject *parent = nullptr);
@@ -54,25 +58,29 @@ public:
 
     void setWorkspaces(const QList<QVariantMap> &workspaces);
 
+    // Updates the current workspace index and emits dataChanged for the
+    // affected rows so QML delegates refresh their 'active' role.
+    void setCurrentWorkspaceIndex(int idx);
+
+    int currentWorkspaceIndex = 0;
+
 private:
     QList<QVariantMap> m_workspaces;
 };
 
-// ── OverviewSurfacePrivate ───────────────────────────────────
+// ── OverviewSurfacePrivate ────────────────────────────────────────────────────
 class OverviewSurfacePrivate : public ShellSurfacePrivate
 {
 public:
     explicit OverviewSurfacePrivate(OverviewSurface *q);
 
     bool ready = false;
-    WindowListModel *windowModel = nullptr;
+    WindowListModel    *windowModel    = nullptr;
     WorkspaceListModel *workspaceModel = nullptr;
 
-    QDBusInterface *kwinInterface = nullptr;
+    WindowManagerBackend *windowManager = nullptr;
 
-    void connectToKWin();
-    void refreshWindowList();
-    void refreshWorkspaceList();
+    void connectToWindowManager();
 };
 
 } // namespace Lingmo

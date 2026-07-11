@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="wlr_foreign_toplevel_management_unstable_v1">
+  <copyright>
+    Copyright © 2018 Ilia Bozhinov
+
+    Permission to use, copy, modify, distribute, and sell this
+    software and its documentation for any purpose is hereby granted
+    without fee, provided that the above copyright notice appear in
+    all copies and that both that copyright notice and this permission
+    notice appear in supporting documentation, and that the name of
+    the copyright holders not be used in advertising or publicity
+    pertaining to distribution of the software without specific,
+    written prior permission.  The copyright holders make no
+    representations about the suitability of this software for any
+    purpose.  It is provided "as is" without express or implied
+    warranty.
+
+    THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+    SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+    FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+    AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
+    OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+    SOFTWARE.
+  </copyright>
+
+  <interface name="zwlr_foreign_toplevel_manager_v1" version="3">
+    <description summary="list and control opened apps">
+      The purpose of this protocol is to enable the creation of taskbars
+      and docks by providing them with a list of opened applications and
+      letting them request certain actions on them, like maximizing, etc.
+    </description>
+
+    <event name="toplevel">
+      <description summary="a toplevel surface was created">
+        A new toplevel handle was created.
+      </description>
+      <arg name="toplevel" type="new_id" interface="zwlr_foreign_toplevel_handle_v1"/>
+    </event>
+
+    <event name="finished">
+      <description summary="the compositor has finished with the manager">
+        This event indicates that the compositor is done sending events
+        to the zwlr_foreign_toplevel_manager_v1. The server will destroy
+        the object immediately after sending this request, so it will
+        become invalid and the client should free any resources associated
+        with it.
+      </description>
+    </event>
+
+    <request name="stop">
+      <description summary="stop sending events">
+        Indicates the client no longer wishes to receive events for new toplevels.
+        However the compositor may emit further toplevel_created events, until
+        the finished event is emitted.
+
+        The client must not send any more requests after this one.
+      </description>
+    </request>
+  </interface>
+
+  <interface name="zwlr_foreign_toplevel_handle_v1" version="3">
+    <description summary="an opened toplevel">
+      A zwlr_foreign_toplevel_handle_v1 object represents an opened toplevel
+      window. Each app may have multiple opened toplevels.
+    </description>
+
+    <event name="title">
+      <description summary="title change">
+        The title of the toplevel has changed.
+      </description>
+      <arg name="title" type="string"/>
+    </event>
+
+    <event name="app_id">
+      <description summary="app-id change">
+        The app-id of the toplevel has changed.
+      </description>
+      <arg name="app_id" type="string"/>
+    </event>
+
+    <event name="output_enter">
+      <description summary="output enter">
+        This event is emitted when the toplevel becomes visible on the given output.
+      </description>
+      <arg name="output" type="object" interface="wl_output"/>
+    </event>
+
+    <event name="output_leave">
+      <description summary="output leave">
+        This event is emitted when the toplevel stops being visible on the given output.
+      </description>
+      <arg name="output" type="object" interface="wl_output"/>
+    </event>
+
+    <enum name="state">
+      <description summary="types of states on the toplevel">
+        The different states that a toplevel can have. These have the same semantics
+        as the states with the same names defined in xdg-toplevel.
+      </description>
+      <entry name="maximized"  value="0" summary="the toplevel is maximized"/>
+      <entry name="minimized"  value="1" summary="the toplevel is minimized"/>
+      <entry name="activated"  value="2" summary="the toplevel is active"/>
+      <entry name="fullscreen" value="3" summary="the toplevel is fullscreen"/>
+    </enum>
+
+    <event name="state">
+      <description summary="the toplevel's state changed">
+        The states of the toplevel have changed. The given state is the
+        new state. The received state can be set as an array of uint32.
+      </description>
+      <arg name="state" type="array"/>
+    </event>
+
+    <event name="done">
+      <description summary="all information about the toplevel has been sent">
+        This event is sent after all changes in the toplevel state have been
+        sent. This allows changes to the zwlr_foreign_toplevel_handle_v1
+        properties to be seen as atomic, even if they happen via multiple events.
+      </description>
+    </event>
+
+    <event name="closed">
+      <description summary="this toplevel has been destroyed">
+        The compositor sends this event to indicate that the
+        zwlr_foreign_toplevel_handle_v1 will no longer receive events and
+        should be destroyed.
+      </description>
+    </event>
+
+    <request name="set_maximized">
+      <description summary="requests that the toplevel be maximized">
+        Requests that the toplevel be maximized.
+      </description>
+    </request>
+
+    <request name="unset_maximized">
+      <description summary="requests that the toplevel be unmaximized">
+        Requests that the toplevel be unmaximized.
+      </description>
+    </request>
+
+    <request name="set_minimized">
+      <description summary="requests that the toplevel be minimized">
+        Requests that the toplevel be minimized.
+      </description>
+    </request>
+
+    <request name="unset_minimized">
+      <description summary="requests that the toplevel be unminimized">
+        Requests that the toplevel be unminimized.
+      </description>
+    </request>
+
+    <request name="activate">
+      <description summary="activate the toplevel">
+        Request that this toplevel be activated on the given seat.
+        The compositor may or may not honor this request.
+      </description>
+      <arg name="seat" type="object" interface="wl_seat"/>
+    </request>
+
+    <request name="close">
+      <description summary="request that the toplevel be closed">
+        Send a request to the toplevel to close itself.
+      </description>
+    </request>
+
+    <request name="set_rectangle">
+      <description summary="the rectangle which represents the toplevel">
+        The rectangle of the surface specified in this request corresponds
+        to the place where the app using this protocol represents the given
+        toplevel. It can be used by the compositor as a hint for animations.
+      </description>
+      <arg name="surface" type="object" interface="wl_surface"/>
+      <arg name="x"       type="int"/>
+      <arg name="y"       type="int"/>
+      <arg name="width"   type="int"/>
+      <arg name="height"  type="int"/>
+    </request>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy the zwlr_foreign_toplevel_handle_v1 object">
+        Destroys the zwlr_foreign_toplevel_handle_v1 object.
+        This request should be called either when the client does not want to
+        use the toplevel anymore or after the closed event has been received to
+        finalize the destruction of the object.
+      </description>
+    </request>
+
+    <!-- version 2 -->
+    <event name="parent" since="2">
+      <description summary="parent change">
+        This event is emitted whenever the parent of the toplevel changes.
+      </description>
+      <arg name="parent" type="object" interface="zwlr_foreign_toplevel_handle_v1" allow-null="true"/>
+    </event>
+  </interface>
+</protocol>

@@ -5,6 +5,7 @@ set(PUBLIC_HEADERS
     ${CMAKE_SOURCE_DIR}/include/LingmoShellSurfaces/PanelSurface.h
     ${CMAKE_SOURCE_DIR}/include/LingmoShellSurfaces/DesktopSurface.h
     ${CMAKE_SOURCE_DIR}/include/LingmoShellSurfaces/OverviewSurface.h
+    ${CMAKE_SOURCE_DIR}/include/LingmoShellSurfaces/WindowManagerBackend.h
 )
 
 set(PRIVATE_HEADERS
@@ -16,6 +17,9 @@ set(PRIVATE_HEADERS
     Platform/Generic/GenericSurfaceBackend.h
     Platform/Wayland/WaylandSurfaceBackend.h
     Platform/X11/X11SurfaceBackend.h
+    WindowManager/VirtualDesktopIntegration.h
+    WindowManager/ForeignToplevel/ForeignToplevelHandle.h
+    WindowManager/ForeignToplevel/ForeignToplevelManager.h
 )
 
 set(SOURCES
@@ -26,10 +30,17 @@ set(SOURCES
     Overview/OverviewSurface.cpp
     Platform/SurfaceBackend.cpp
     Platform/Generic/GenericSurfaceBackend.cpp
+    WindowManager/WindowManagerBackend.cpp
+    WindowManager/KWinBackend.cpp
+    WindowManager/VirtualDesktopIntegration.cpp
 )
 
 if(LINGMO_HAVE_WAYLAND)
     list(APPEND SOURCES Platform/Wayland/WaylandSurfaceBackend.cpp)
+    list(APPEND SOURCES Platform/Wayland/LayerShellManager.cpp)
+    list(APPEND SOURCES Platform/Wayland/LayerSurface.cpp)
+    list(APPEND SOURCES WindowManager/ForeignToplevel/ForeignToplevelHandle.cpp)
+    list(APPEND SOURCES WindowManager/ForeignToplevel/ForeignToplevelManager.cpp)
 endif()
 
 if(LINGMO_HAVE_X11)
@@ -73,6 +84,14 @@ target_link_libraries(LingmoShellSurfaces
 if(LINGMO_HAVE_WAYLAND)
     target_link_libraries(LingmoShellSurfaces PRIVATE Qt6::WaylandClient Wayland::Client)
     target_compile_definitions(LingmoShellSurfaces PRIVATE LINGMO_HAVE_WAYLAND=1)
+    qt6_generate_wayland_protocol_client_sources(LingmoShellSurfaces
+        FILES
+            ${CMAKE_CURRENT_SOURCE_DIR}/Platform/Wayland/Protocol/wlr-layer-shell-unstable-v1.xml
+            ${CMAKE_CURRENT_SOURCE_DIR}/Platform/Wayland/Protocol/wlr-foreign-toplevel-management-unstable-v1.xml
+    )
+    target_include_directories(LingmoShellSurfaces PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    target_include_directories(LingmoShellSurfaces PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/WindowManager/ForeignToplevel)
 endif()
 
 if(LINGMO_HAVE_X11)

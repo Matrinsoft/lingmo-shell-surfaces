@@ -65,7 +65,6 @@ Item {
                 border.color: "#44ffffff"
                 border.width: 1
 
-                // Window title
                 Text {
                     anchors {
                         bottom: parent.bottom
@@ -105,7 +104,8 @@ Item {
                 width:  80
                 height: 50
                 radius: 6
-                color:  model.active ? "#5555ff" : "#33ffffff"
+                // 'active' role is now properly provided by WorkspaceListModel
+                color: model.active ? "#5555ff" : "#33ffffff"
 
                 Text {
                     anchors.centerIn: parent
@@ -116,7 +116,8 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: backend.switchToWorkspace(model.workspaceId)
+                    // Fixed: was model.workspaceId (undefined); correct role is workspaceIndex
+                    onClicked: backend.switchToWorkspace(model.workspaceIndex)
                 }
             }
         }
