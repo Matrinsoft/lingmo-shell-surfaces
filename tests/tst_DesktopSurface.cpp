@@ -54,8 +54,8 @@ private Q_SLOTS:
     {
         DesktopSurface desktop;
         QSignalSpy spy(&desktop, &DesktopSurface::fillModeChanged);
-        desktop.setFillMode(DesktopSurface::Stretch);
-        QCOMPARE(desktop.fillMode(), DesktopSurface::Stretch);
+        desktop.setFillMode(DesktopSurface::WallpaperFillMode::Stretch);
+        QCOMPARE(desktop.fillMode(), DesktopSurface::WallpaperFillMode::Stretch);
         QCOMPARE(spy.count(), 1);
     }
 
@@ -68,7 +68,7 @@ private Q_SLOTS:
     void fillModeDefaultIsPreserveAspectCrop()
     {
         DesktopSurface desktop;
-        QCOMPARE(desktop.fillMode(), DesktopSurface::PreserveAspectCrop);
+        QCOMPARE(desktop.fillMode(), DesktopSurface::WallpaperFillMode::PreserveAspectCrop);
     }
 };
 

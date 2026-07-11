@@ -43,10 +43,10 @@ private Q_SLOTS:
 
     void surfacePlatformValues()
     {
-        QVERIFY(static_cast<int>(SurfacePlatform::Unknown)   >= 0);
-        QVERIFY(static_cast<int>(SurfacePlatform::Wayland)   >= 0);
-        QVERIFY(static_cast<int>(SurfacePlatform::X11)       >= 0);
-        QVERIFY(static_cast<int>(SurfacePlatform::Offscreen) >= 0);
+        QCOMPARE(static_cast<int>(SurfacePlatform::Unknown),   0);
+        QCOMPARE(static_cast<int>(SurfacePlatform::Wayland),   1);
+        QCOMPARE(static_cast<int>(SurfacePlatform::X11),       2);
+        QCOMPARE(static_cast<int>(SurfacePlatform::Offscreen), 3);
     }
 
     void geometryDebugOutput()
