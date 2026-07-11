@@ -18,7 +18,7 @@ jobs:
       - name: Install system dependencies
         run: |
           apt-get update -qq
-          apt-get install -y -qq build-essential cmake debhelper dpkg-dev \
+          apt-get install -y -qq build-essential cmake ninja-build debhelper dpkg-dev \
             qt6-base-dev qt6-declarative-dev qt6-wayland-dev \
             libwayland-dev libxcb1-dev libx11-dev \
             curl jq
