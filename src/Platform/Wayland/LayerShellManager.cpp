@@ -8,7 +8,7 @@ Q_LOGGING_CATEGORY(lcLayerShell, "lingmo.shell.surfaces.layershell")
 namespace Lingmo {
 
 LayerShellManager::LayerShellManager(QObject *parent)
-    : QWaylandClientExtensionTemplate<LayerShellManager>(/* version */ 4)
+    : QWaylandClientExtensionTemplate<LayerShellManager>(5)
     , QtWayland::zwlr_layer_shell_v1()
 {
     setParent(parent);
@@ -30,8 +30,8 @@ LayerShellManager::~LayerShellManager()
 
 void LayerShellManager::init(struct ::wl_registry *registry, int id, int version)
 {
-    // Request at most the version we were compiled for (4).
-    const int boundVersion = std::min(version, 4);
+    // Request at most the version we were compiled for (5).
+    const int boundVersion = std::min(version, 5);
     QtWayland::zwlr_layer_shell_v1::init(registry, id, boundVersion);
     qCInfo(lcLayerShell) << "zwlr_layer_shell_v1 bound, version" << boundVersion;
 }

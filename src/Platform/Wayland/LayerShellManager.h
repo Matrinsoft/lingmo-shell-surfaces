@@ -14,7 +14,7 @@ public:
     explicit LayerShellManager(QObject *parent = nullptr);
     ~LayerShellManager() override;
 
-    void init(struct ::wl_registry *registry, int id, int version) override;
+    void init(struct ::wl_registry *registry, int id, int version);
 };
 
 } // namespace Lingmo
