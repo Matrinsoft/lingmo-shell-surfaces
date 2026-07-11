@@ -97,6 +97,9 @@ jobs:
           for url in $ASSETS; do curl -sL "$url" -o "/tmp/$(basename $url)"; done
           dpkg -i /tmp/liblingmoicon*.deb || apt-get install -y -f
 
+      - name: Remove debian/compat if present
+        run: rm -f debian/compat
+
       - name: Build Debian package
         run: |
           dpkg-buildpackage -us -uc -b -d
